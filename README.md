@@ -32,6 +32,12 @@
 
 例 現在作業中のブランチ名：feat/create_button | プッシュする場合：git push origin feat/create_button
 
+## コンフリクト発生時
+> git checkout master
+> git pull
+> git checkout 作業ブランチ
+> git rebase master
+
 
 
 プルリクエスト作成後、レビューが必要であればレビュアーにYutoFuseを追加しておいてください
