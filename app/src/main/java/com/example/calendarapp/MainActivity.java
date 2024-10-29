@@ -11,10 +11,15 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.annotation.NonNull;
 import android.widget.CalendarView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import android.widget.ImageView;
 import android.widget.Button;
 import android.view.View;
 
 public class MainActivity extends AppCompatActivity {
+
+    private ActivityResultLauncher<String[]> launcher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,12 +42,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
+        ImageView imageView = findViewById(R.id.BackGroundImage);
         Button btnSelectImage = (Button)findViewById(R.id.buttonSelectImage);
-        btnSelectImage.setOnClickListener(new View.OnClickListener(){
-            public void onClick( View view ){
-                
-            }
-        });
+        launcher = registerForActivityResult(new ActivityResultContracts.OpenDocument(),
+                uri -> {
+                    if (uri != null) {
+                        imageView.setImageURI(uri);
+                    }
+                }
+        );
+        btnSelectImage.setOnClickListener(v -> launcher.launch(new String[]{"image/*"}));
     }
 }
