@@ -30,8 +30,7 @@ git commit -m "コミットメッセージを入れる"
 ## コミットをプッシュする
 git push origin 現在作成中のブランチ名
 
-例 現在作業中のブランチ名：feat/create_button\n
-　 プッシュする場合　　　：git push origin feat/create_button
+例 現在作業中のブランチ名：feat/create_button | プッシュする場合：git push origin feat/create_button
 
 
 
