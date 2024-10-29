@@ -11,6 +11,9 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.annotation.NonNull;
 import android.widget.CalendarView;
 
+import android.widget.Button;
+import android.view.View;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -31,6 +34,14 @@ public class MainActivity extends AppCompatActivity {
                 // 日付が選択されたときの処理
                 // year, month, dayOfMonth を使用して処理を行う
                 // 予定のTodoリストとかにしてもいいんじゃない？
+            }
+        });
+
+
+        Button btnSelectImage = (Button)findViewById(R.id.buttonSelectImage);
+        btnSelectImage.setOnClickListener(new View.OnClickListener(){
+            public void onClick( View view ){
+                
             }
         });
     }
