@@ -11,6 +11,10 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.annotation.NonNull;
 import android.widget.CalendarView;
 
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.Button;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -29,8 +33,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSelectedDayChange(@NonNull CalendarView view, int year, int month, int dayOfMonth) {
                 // 日付が選択されたときの処理
-                // year, month, dayOfMonth を使用して処理を行う
-                // 予定のTodoリストとかにしてもいいんじゃない？
+                // 各日付ごとのメニューが下から出てくるようにする
+                LinearLayout selectedDateBar = findViewById(R.id.selectedDateBar);
+                Button selectedDate = findViewById(R.id.selectedDate);
+                selectedDateBar.setVisibility(View.VISIBLE);
+//                selectedDate.setText(year + "/" + (month + 1) + "/" + dayOfMonth);
             }
         });
     }
