@@ -34,8 +34,11 @@
 
 ## コンフリクト発生時
 > git checkout master
+> 
 > git pull
+> 
 > git checkout 作業ブランチ
+> 
 > git rebase master
 
 
