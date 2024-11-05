@@ -1,3 +1,7 @@
+# 画面設計
+![image](https://github.com/user-attachments/assets/86e924f5-25f1-437b-a9be-67830e077c91)
+
+
 # gitの操作一覧
 
 ## masterブランチから最新情報を取得する
