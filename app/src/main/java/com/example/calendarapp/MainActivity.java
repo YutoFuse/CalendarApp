@@ -1,5 +1,6 @@
 package com.example.calendarapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
@@ -11,11 +12,16 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.annotation.NonNull;
 import android.widget.CalendarView;
 
+
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import android.widget.ImageView;
 import android.widget.Button;
 import android.view.View;
+
+import android.widget.LinearLayout;
+import android.content.Intent;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -33,12 +39,22 @@ public class MainActivity extends AppCompatActivity {
         });
 
         CalendarView calendarView = findViewById(R.id.calendarView);
+        // commit test
         calendarView.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
             @Override
             public void onSelectedDayChange(@NonNull CalendarView view, int year, int month, int dayOfMonth) {
                 // 日付が選択されたときの処理
-                // year, month, dayOfMonth を使用して処理を行う
-                // 予定のTodoリストとかにしてもいいんじゃない？
+                // 各日付ごとのメニューが下から出てくるようにする
+                LinearLayout selectedDateBar = findViewById(R.id.selectedDateBar);
+                Button selectedDate = findViewById(R.id.selectedDate);
+                selectedDateBar.setVisibility(View.VISIBLE);
+//                selectedDate.setText(year + "/" + (month + 1) + "/" + dayOfMonth);
+                selectedDateBar.setVisibility(View.VISIBLE);
+                selectedDate.setOnClickListener(v -> {
+                    Intent intent = new Intent(MainActivity.this, ConfigMenu.class);
+                    intent.putExtra("selectedDate", year + "/" + (month + 1) + "/" + dayOfMonth);
+                    startActivity(intent);
+                });
             }
         });
 
