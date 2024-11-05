@@ -1,5 +1,6 @@
 package com.example.calendarapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
@@ -14,6 +15,7 @@ import android.widget.CalendarView;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Button;
+import android.content.Intent;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -39,6 +41,12 @@ public class MainActivity extends AppCompatActivity {
                 Button selectedDate = findViewById(R.id.selectedDate);
                 selectedDateBar.setVisibility(View.VISIBLE);
 //                selectedDate.setText(year + "/" + (month + 1) + "/" + dayOfMonth);
+                selectedDateBar.setVisibility(View.VISIBLE);
+                selectedDate.setOnClickListener(v -> {
+                    Intent intent = new Intent(MainActivity.this, ConfigMenu.class);
+                    intent.putExtra("selectedDate", year + "/" + (month + 1) + "/" + dayOfMonth);
+                    startActivity(intent);
+                });
             }
         });
     }
