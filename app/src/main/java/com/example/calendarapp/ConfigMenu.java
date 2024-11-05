@@ -9,6 +9,9 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import android.widget.TextView;
+import android.widget.ImageView;
+import android.view.View;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 
 public class ConfigMenu extends AppCompatActivity {
 
@@ -27,6 +30,19 @@ public class ConfigMenu extends AppCompatActivity {
         TextView dateTextView = findViewById(R.id.dateTextView);
         String selectedDate = getIntent().getStringExtra("selectedDate");
         dateTextView.setText(selectedDate);
+
+        SwitchMaterial switchMaterial = findViewById(R.id.material_switch);
+        ImageView alertIcon = findViewById(R.id.alertIcon);
+
+        switchMaterial.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                alertIcon.setImageResource(R.drawable.ic_alert);
+                alertIcon.setVisibility(View.VISIBLE);
+            } else {
+                alertIcon.setImageResource(R.drawable.ic_alert_close);
+                alertIcon.setVisibility(View.VISIBLE);
+            }
+        });
 
         // 戻るボタン
         findViewById(R.id.backButton).setOnClickListener(v -> finish());
