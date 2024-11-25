@@ -1,9 +1,10 @@
 package com.example.calendarapp;
 
 import android.app.TimePickerDialog;
+import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.activity.EdgeToEdge;
@@ -18,6 +19,8 @@ public class ConfigMenu extends AppCompatActivity {
 
     private TextView startTimeText;
     private TextView endTimeText;
+    private EditText noteEditText;
+    private SwitchMaterial alertSwitch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,54 +35,54 @@ public class ConfigMenu extends AppCompatActivity {
             return insets;
         });
 
-        // 日付情報を表示
+        // Viewの参照取得
         TextView dateTextView = findViewById(R.id.dateTextView);
-        String selectedDate = getIntent().getStringExtra("selectedDate");
-        dateTextView.setText(selectedDate);
-
-        SwitchMaterial switchMaterial = findViewById(R.id.material_switch);
+        startTimeText = findViewById(R.id.startDateTextView);
+        endTimeText = findViewById(R.id.endDateTextView);
+        noteEditText = findViewById(R.id.noteEditText);
+        alertSwitch = findViewById(R.id.material_switch);
         ImageView alertIcon = findViewById(R.id.alertIcon);
 
+        // Intentからデータを取得
+        Intent intent = getIntent();
+        String selectedDate = intent.getStringExtra("date");
+        String startTime = intent.getStringExtra("startTime");
+        String endTime = intent.getStringExtra("endTime");
+        String note = intent.getStringExtra("note");
+        boolean isAlertEnabled = intent.getBooleanExtra("isAlertEnabled", false);
+
+        // 取得したデータをセット
+        dateTextView.setText(selectedDate);
+        if (startTime != null) {
+            startTimeText.setText(startTime);
+        }
+        if (endTime != null) {
+            endTimeText.setText(endTime);
+        }
+        if (note != null) {
+            noteEditText.setText(note);
+        }
+        alertSwitch.setChecked(isAlertEnabled);
+        alertIcon.setImageResource(isAlertEnabled ? R.drawable.ic_alert : R.drawable.ic_alert_close);
+
         // アラートスイッチの切り替え
-        switchMaterial.setOnCheckedChangeListener((buttonView, isChecked) -> {
+        alertSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             alertIcon.setImageResource(isChecked ? R.drawable.ic_alert : R.drawable.ic_alert_close);
             alertIcon.setVisibility(View.VISIBLE);
         });
 
-        // 時間表示用のTextViewを取得
-        startTimeText = findViewById(R.id.startDateTextView);
-        endTimeText = findViewById(R.id.endDateTextView);
-
-        // 現在の時間を取得
-        Calendar calendar = Calendar.getInstance();
-        int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
-        int currentMinute = calendar.get(Calendar.MINUTE);
-
-        // 開始時間の初期値を設定
-        startTimeText.setText(String.format("%02d:%02d", currentHour, currentMinute));
-
-        // 終了時間の初期値を設定（現在の時間から1時間後）
-        calendar.add(Calendar.HOUR_OF_DAY, 1);
-        int endHour = calendar.get(Calendar.HOUR_OF_DAY);
-        int endMinute = calendar.get(Calendar.MINUTE);
-        endTimeText.setText(String.format("%02d:%02d", endHour, endMinute));
-
-        // 開始時間設定
+        // 時間選択ボタンの設定
         findViewById(R.id.startTimeButton).setOnClickListener(v -> showTimePicker(startTimeText));
-
-        // 終了時間設定
         findViewById(R.id.endTimeButton).setOnClickListener(v -> showTimePicker(endTimeText));
 
-        // 時間を保存するボタンのクリックリスナー
-        findViewById(R.id.saveTimeButton).setOnClickListener(v -> saveTime());
+        // 保存ボタン
+        findViewById(R.id.saveTimeButton).setOnClickListener(v -> saveAndReturn());
 
         // 戻るボタン
         findViewById(R.id.backButton).setOnClickListener(v -> finish());
     }
 
-    /**
-     * 時間選択ダイアログを表示する共通メソッド
-     */
+
     private void showTimePicker(TextView targetTextView) {
         Calendar calendar = Calendar.getInstance();
         int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
@@ -90,35 +93,22 @@ public class ConfigMenu extends AppCompatActivity {
         }, currentHour, currentMinute, true).show();
     }
 
-    /**
-     * 入力された時間を保存する処理
-     */
-    private void saveTime() {
+    private void saveAndReturn() {
+        String selectedDate = getIntent().getStringExtra("selectedDate"); // 日付を取得
         String startTime = startTimeText.getText().toString();
         String endTime = endTimeText.getText().toString();
+        String note = noteEditText.getText().toString();
+        boolean isAlertEnabled = alertSwitch.isChecked();
 
-        // 未入力チェック
-        if (startTime.equals("--:--") || endTime.equals("--:--")) {
-            if (startTime.equals("--:--")) {
-                startTimeText.setError("開始時間を入力してください");
-            }
-            if (endTime.equals("--:--")) {
-                endTimeText.setError("終了時間を入力してください");
-            }
-            return;
-        }
+        Intent resultIntent = new Intent();
+        resultIntent.putExtra("date", selectedDate); // 日付を含める
+        resultIntent.putExtra("startTime", startTime);
+        resultIntent.putExtra("endTime", endTime);
+        resultIntent.putExtra("note", note);
+        resultIntent.putExtra("isAlertEnabled", isAlertEnabled);
 
-        // ログに保存（または他の保存処理）
-        Log.d("ConfigMenu", "開始時間: " + startTime + ", 終了時間: " + endTime);
-
-        // ユーザーフィードバック（簡易メッセージ）
-        showToast("時間を保存しました！");
+        setResult(RESULT_OK, resultIntent); // 結果をセット
+        finish(); // アクティビティを終了
     }
 
-    /**
-     * トーストメッセージを表示
-     */
-    private void showToast(String message) {
-        android.widget.Toast.makeText(this, message, android.widget.Toast.LENGTH_SHORT).show();
-    }
 }
