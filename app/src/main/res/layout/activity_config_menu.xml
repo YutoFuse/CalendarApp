@@ -62,7 +62,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="--:--"
-        android:textSize="16sp"
+        android:textSize="24sp"
         android:layout_marginStart="8dp"
         app:layout_constraintTop_toTopOf="@id/startTimeButton"
         app:layout_constraintBottom_toBottomOf="@id/startTimeButton"
@@ -83,11 +83,24 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="--:--"
-        android:textSize="16sp"
+        android:textSize="24sp"
         android:layout_marginStart="8dp"
         app:layout_constraintTop_toTopOf="@id/endTimeButton"
         app:layout_constraintBottom_toBottomOf="@id/endTimeButton"
         app:layout_constraintStart_toEndOf="@id/endTimeButton" />
+
+    <EditText
+        android:id="@+id/noteEditText"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:hint="メモ欄"
+        android:gravity="top"
+        android:inputType="textMultiLine"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/endTimeButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_default="wrap" />
 
     <Button
         android:id="@+id/saveTimeButton"
@@ -95,7 +108,7 @@
         android:layout_height="wrap_content"
         android:text="保存"
         android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@id/endTimeButton"
+        app:layout_constraintTop_toBottomOf="@id/noteEditText"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
