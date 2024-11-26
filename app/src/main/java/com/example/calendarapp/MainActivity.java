@@ -18,7 +18,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import android.widget.ImageView;
+
 public class MainActivity extends AppCompatActivity {
+
+    private ActivityResultLauncher<String[]> launcher;
 
     private Map<String, List<DayData>> dayDataMap = new HashMap<>();
     private ActivityResultLauncher<Intent> configMenuLauncher;
@@ -53,6 +57,18 @@ public class MainActivity extends AppCompatActivity {
             String selectedDate = year + "/" + (month + 1) + "/" + dayOfMonth;
             showBottomMenu(selectedDate);
         });
+
+        ImageView imageView = findViewById(R.id.BackGroundImage);
+        Button btnSelectImage = (Button)findViewById(R.id.buttonSelectImage);
+
+        launcher = registerForActivityResult(new ActivityResultContracts.OpenDocument(),
+                uri -> {
+                    if (uri != null) {
+                        imageView.setImageURI(uri);
+                    }
+                }
+        );
+        btnSelectImage.setOnClickListener(v -> launcher.launch(new String[]{"image/*"}));
     }
 
     /**
