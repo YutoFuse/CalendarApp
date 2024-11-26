@@ -1,5 +1,8 @@
 package com.example.calendarapp;
 
+import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,13 +15,30 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import java.util.Calendar;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.AlarmManager;
+import android.content.Context;
+import android.os.Build;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity {
+import android.Manifest;
+import android.content.pm.PackageManager;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
+import android.app.AlarmManager;
+import android.provider.Settings;
+
+public class
+MainActivity extends AppCompatActivity {
+    private static final int REQUEST_CODE_SCHEDULE_EXACT_ALARM = 1;
 
     private Map<String, List<DayData>> dayDataMap = new HashMap<>();
     private ActivityResultLauncher<Intent> configMenuLauncher;
@@ -27,6 +47,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        requestScheduleExactAlarmPermission();
+
+        createNotificationChannel(); // 通知チャンネルの作成
 
         CalendarView calendarView = findViewById(R.id.calendarView);
 
@@ -45,7 +69,13 @@ public class MainActivity extends AppCompatActivity {
 
                 // 日付にマークを付ける
                 markCalendarDate(calendarView, date);
+
+                // 通知を設定
+                if (isAlertEnabled) {
+                    scheduleNotification(date, startTime, note);
+                }
             }
+
         });
 
         // カレンダー日付選択
@@ -53,6 +83,46 @@ public class MainActivity extends AppCompatActivity {
             String selectedDate = year + "/" + (month + 1) + "/" + dayOfMonth;
             showBottomMenu(selectedDate);
         });
+    }
+
+    private void requestScheduleExactAlarmPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.SCHEDULE_EXACT_ALARM) != PackageManager.PERMISSION_GRANTED) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+                startActivityForResult(intent, REQUEST_CODE_SCHEDULE_EXACT_ALARM);
+            } else {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.SCHEDULE_EXACT_ALARM}, REQUEST_CODE_SCHEDULE_EXACT_ALARM);
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_CODE_SCHEDULE_EXACT_ALARM) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Log.d("Permission", "スケジュールされたアラームの許可が与えられました");
+            } else {
+                Log.d("Permission", "スケジュールされたアラームの許可が拒否されました");
+                showPermissionDeniedDialog();
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE_SCHEDULE_EXACT_ALARM) {
+            AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                if (alarmManager.canScheduleExactAlarms()) {
+                    Log.d("Permission", "スケジュールされたアラームの許可が与えられました");
+                } else {
+                    Log.d("Permission", "スケジュールされたアラームの許可が拒否されました");
+                    showPermissionDeniedDialog();
+                }
+            }
+        }
     }
 
     /**
@@ -77,7 +147,6 @@ public class MainActivity extends AppCompatActivity {
         TextView dateTextView = bottomSheetView.findViewById(R.id.dateTextView);
         LinearLayout eventListLayout = bottomSheetView.findViewById(R.id.eventListLayout);
         Button addEventButton = bottomSheetView.findViewById(R.id.addEventButton);
-
         dateTextView.setText(date);
 
         // イベントをリストとして表示
@@ -130,6 +199,60 @@ public class MainActivity extends AppCompatActivity {
         });
 
         bottomSheetDialog.show();
+    }
+
+    /**
+     * 通知チャンネルを作成
+     */
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "Event Reminder Channel";
+            String description = "Channel for event reminders";
+            int importance = NotificationManager.IMPORTANCE_HIGH;
+            NotificationChannel channel = new NotificationChannel("eventReminderChannel", name, importance);
+            channel.setDescription(description);
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
+
+    /**
+     * 通知をスケジュール
+     */
+    @SuppressLint("ScheduleExactAlarm")
+    private void scheduleNotification(String date, String startTime, String note) {
+        Intent intent = new Intent(this, NotificationReceiver.class);
+        intent.putExtra("note", note);
+        intent.putExtra("startTime", startTime); // startTimeを追加
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+
+        // 開始時間をCalendarに変換
+        Calendar calendar = Calendar.getInstance();
+        String[] dateParts = date.split("/");
+        String[] timeParts = startTime.split(":");
+        calendar.set(Calendar.YEAR, Integer.parseInt(dateParts[0]));
+        calendar.set(Calendar.MONTH, Integer.parseInt(dateParts[1]) - 1);
+        calendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(dateParts[2]));
+        calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(timeParts[0]));
+        calendar.set(Calendar.MINUTE, Integer.parseInt(timeParts[1]));
+        calendar.set(Calendar.SECOND, 0);
+
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+    }
+
+    private void showPermissionDeniedDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("権限が必要です")
+                .setMessage("正確なアラームを設定する��めに、アプリに権限を付与してください。")
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        requestScheduleExactAlarmPermission();
+                    }
+                })
+                .setNegativeButton("キャンセル", null)
+                .show();
     }
 }
 
